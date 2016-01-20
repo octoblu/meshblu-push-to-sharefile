@@ -10,35 +10,34 @@ MESSAGE_SCHEMA = {}
 OPTIONS_SCHEMA =
   type: 'object'
   properties:
-    toFolder:
+    remoteFolder:
       type: 'string'
       required: true
-    fromFolder:
+    localFolder:
       type: 'string'
       required: true
 
 class Plugin extends EventEmitter
   constructor: ->
-    @toFolder = null
     @options = {}
     @messageSchema = MESSAGE_SCHEMA
     @optionsSchema = OPTIONS_SCHEMA
     shareFileService = new ShareFileService
     @shareFileContoller = new ShareFileController {shareFileService}
 
-  cancelAndStart: (@toFolder) =>
-    return console.error 'invalid folder to sync to' unless @toFolder
-    return console.error 'invalid folder to sync from' unless @fromFolder
+  cancelAndStart: (@remoteFolder) =>
+    return console.error 'invalid folder to sync to' unless @remoteFolder
+    return console.error 'invalid folder to sync from' unless @localFolder
 
-    return unless @shareFileContoller.didChange {@toFolder, @fromFolder}
+    return unless @shareFileContoller.didChange {@remoteFolder, @localFolder}
     @shareFileContoller.cancel =>
-      @shareFileContoller.start {@toFolder, @fromFolder}
+      @shareFileContoller.start {@remoteFolder, @localFolder}
 
   onConfig: (device) =>
     @setOptions device.options
 
   setOptions: (options={}) =>
-    {@fromFolder, @toFolder} = options
+    {@localFolder, @remoteFolder} = options
     @cancelAndStart()
 
 module.exports =

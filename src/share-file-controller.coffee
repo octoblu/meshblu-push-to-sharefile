@@ -1,13 +1,17 @@
+async = require 'async'
+debug = require('debug')('meshblu-push-to-sharefile:share-file-controller')
+
 class ShareFileContoller
-  constructor: ({@shareFileService}) ->
+  constructor: ({@shareFileService, @localFileSystemService}) ->
 
-  start: ({@toFolder, @fromFolder}) =>
+  start: (callback) =>
+    debug 'starting...'
 
-  didChange: ({toFolder, fromFolder}, callback) =>
-    return false if toFolder == @toFolder and fromFolder == @fromFolder
-    return true
-
-  cancel: (callback) =>
-    callback null
+    async.parallel {
+      remote: @shareFileService.getFilesForFolder
+      local: @localFileSystemService.getFilesForFolder
+    }, (error) =>
+      return callback error if error?
+      callback null
 
 module.exports = ShareFileContoller
